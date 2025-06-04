@@ -229,8 +229,8 @@ def scrape_google_with_oxylabs(query, geo_location):
     Returns:
         A Pandas DataFrame containing the search results, or None on error.
     """
-    oxylabs_username = st.secrets('OXYLABS_USERNAME')
-    oxylabs_password = st.secrets('OXYLABS_PASSWORD')
+    oxylabs_username = st.secrets['OXYLABS_USERNAME']
+    oxylabs_password = st.secrets['OXYLABS_PASSWORD']
 
     if not oxylabs_username or not oxylabs_password:
         st.error("Oxylabs credentials not found in environment variables.")
