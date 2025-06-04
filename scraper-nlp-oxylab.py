@@ -272,7 +272,7 @@ def scrape_google_with_oxylabs(query, geo_location):
             # Extract relative date from the description
             date_match = re.search(r"(\d+\s+(hour|day|week|month|year)s?\s+ago)", description, re.IGNORECASE)
             relative_date = date_match.group(1) if date_match else 'N/A'  # Extract or default
-            
+
             news_results.append({
                 "Link": result.get('url', ''),
                 "Judul": result.get('title', ''),
@@ -320,7 +320,7 @@ def get_news_data(method, start_date, end_date, keyword_query):
     # 🚀 First scrape:
     if method == "BeautifulSoup":
         news_df = scrape_with_bs4(base_url, headers)
-    elif method == "Oxylabs API":
+    elif method == "Oxylabs":
         news_df = scrape_google_with_oxylabs(base_url)
     else:
         raise ValueError("Invalid method")
@@ -499,7 +499,7 @@ if menu == "Scrape":
         with col2:
             end_date = st.date_input("Tanggal akhir")
 
-        method = st.radio("Metode Scraping:", ["BeautifulSoup", "Selenium", "Selenium DuckDuckGo"], horizontal=True)
+        method = st.radio("Metode Scraping:", ["BeautifulSoup", "Oxylabs"], horizontal=True)
         nlp_options = st.multiselect(
             "Pilih fitur NLP yang ingin dijalankan:",
             ["Article Content", "Summary", "Sentiment", "Keywords", "Author", "Exact Publish Date"]
@@ -570,7 +570,7 @@ elif menu == "Queue":
             start_date = st.date_input("Tanggal mulai")
         with col2:
             end_date = st.date_input("Tanggal akhir")
-        method = st.radio("Metode Scraping:", ["BeautifulSoup", "Selenium"], horizontal=True)
+        method = st.radio("Metode Scraping:", ["BeautifulSoup", "Oxylabs"], horizontal=True)
         nlp_options = st.multiselect(
             "Pilih fitur NLP yang ingin dijalankan:",
             ["Article Content", "Summary", "Sentiment", "Keywords", "Author", "Exact Publish Date"]
