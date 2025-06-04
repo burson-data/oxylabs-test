@@ -221,7 +221,7 @@ def scrape_with_bs4(base_url, headers=None):
 def scrape_google_with_oxylabs(query, geo_location, pages=1):
  """
  Scrapes Google News results using the Oxylabs Real-Time Web Scraper API,
- following a structure closer to the Oxylabs documentation example.
+ capturing all available data fields without renaming.
  
  Args:
      query: The search query.
@@ -270,20 +270,9 @@ def scrape_google_with_oxylabs(query, geo_location, pages=1):
              page_num = page_data.get('page', 'N/A')
              if 'results' in page_data and 'main' in page_data['results']:
                  for news in page_data['results']['main']:
-                     # Extract relative date from description
-                     description = news.get('description', '')
-                     date_match = re.search(r"(\d+\s+(hari|jam|menit|minggu|bulan|tahun)\s+lalu|kemarin)", description, re.IGNORECASE)
-                     relative_date = date_match.group(1) if date_match else 'N/A'
- 
-                     news_item = {
-                         'title': news.get('title', 'N/A'),
-                         'url': news.get('url', 'N/A'),
-                         'snippet': description,  # Use the full description
-                         'Tanggal': relative_date,  # Store the extracted relative date
-                         'Media': extract_domain_from_url(news.get('url', 'N/A')),
-                         'page': page_num
-                     }
-                     all_news.append(news_item)
+                     # Capture all available data fields
+                     news['page'] = page_num  # Add page number to the news item
+                     all_news.append(news)
  
          news_results_df = pd.DataFrame(all_news)
  
