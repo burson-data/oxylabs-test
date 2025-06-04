@@ -218,84 +218,91 @@ def scrape_with_bs4(base_url, headers=None):
     return news_results
 
 
-def scrape_google_with_oxylabs(query, geo_location):
-    """
-    Scrapes Google Search results using the Oxylabs Real-Time Web Scraper API.
-
-    Args:
-        query: The search query.
-        geo_location: The geographic location (e.g., "Indonesia").
-
-    Returns:
-        A Pandas DataFrame containing the search results, or None on error.
-    """
-    oxylabs_username = st.secrets['OXYLABS_USERNAME']
-    oxylabs_password = st.secrets['OXYLABS_PASSWORD']
-
-    if not oxylabs_username or not oxylabs_password:
-        st.error("Oxylabs credentials not found in environment variables.")
-        return None
-
-    payload = {
-        'source': 'google_search',
-        'query': query,
-        'geo_location': geo_location,
-        'parse': True,
-        'context': [
-        {'key': 'tbm', 'value': 'nws'},],
-    }
-
-    try:
-        response = requests.request(
-            'POST',
-            'https://realtime.oxylabs.io/v1/queries',
-            auth=(oxylabs_username, oxylabs_password),
-            json=payload,
-        )
-
-        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-        data = response.json()
-
-        # Check for errors in the API response
-        if 'results' not in data or not data['results']:
-            st.warning("No results found from Oxylabs API.")
-            return pd.DataFrame()  # Return an empty DataFrame
-
-        # Extract organic results
-        organic_results = data['results'][0]['content'].get('organic', [])
-
-        # Prepare data for DataFrame
-        news_results = []
-        for result in organic_results:
-
-            description = result.get('description', '')  # Get the description
-            # Extract relative date from the description
-            date_match = re.search(r"(\d+\s+(hour|day|week|month|year)s?\s+ago)", description, re.IGNORECASE)
-            relative_date = date_match.group(1) if date_match else 'N/A'  # Extract or default
-
-            news_results.append({
-                "Link": result.get('url', ''),
-                "Judul": result.get('title', ''),
-                "Snippet": result.get('description', ''),
-                "Tanggal": relative_date,  # Oxylabs doesn't directly provide date
-                "Media": extract_domain_from_url(result.get('url', ''))
-            })
-
-        news_results_df = pd.DataFrame(news_results, columns=['Link', 'Judul', 'Snippet', 'Tanggal', 'Media'])
-        # Join with media database
-        news_results_df = news_results_df.merge(media_db, on='Media', how='left')
-        return news_results_df
-
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error making Oxylabs API request: {e}")
-        return None
-    except KeyError as e:
-        st.error(f"Error parsing Oxylabs API response: {e}")
-        return None
-    except Exception as e:
-        st.error(f"Unexpected error: {e}")
-        return None
-
+def scrape_google_with_oxylabs(query, geo_location, pages=1):
+ """
+ Scrapes Google News results using the Oxylabs Real-Time Web Scraper API,
+ following a structure closer to the Oxylabs documentation example.
+ 
+ Args:
+     query: The search query.
+     geo_location: The geographic location (e.g., "Indonesia").
+     pages: The number of pages to scrape (default: 1).
+ 
+ Returns:
+     A Pandas DataFrame containing the search results, or None on error.
+ """
+ try:
+     oxylabs_username = st.secrets['OXYLABS_USERNAME']
+     oxylabs_password = st.secrets['OXYLABS_PASSWORD']
+     credentials = (oxylabs_username, oxylabs_password)
+ except KeyError as e:
+     st.error(f"Missing Streamlit secret: {e}")
+     return None
+ 
+ payload = {
+     'source': 'google_search',
+     'query': query,
+     'pages': str(pages),
+     'parse': True,
+     'geo_location': geo_location,
+     'context': [
+         {'key': 'tbm', 'value': 'nws'},
+     ]
+ }
+ 
+ try:
+     response = requests.post(
+         'https://realtime.oxylabs.io/v1/queries',
+         auth=credentials,
+         json=payload,
+     )
+     response.raise_for_status()  # Raise HTTPError for bad responses
+     data = response.json()
+ 
+     # Print the raw JSON response (for debugging)
+     # pprint(data)  # Uncomment this line for debugging
+ 
+     # Extract content from results
+     try:
+         all_news = []
+         for item in data['results']:
+             page_data = item['content']
+             page_num = page_data.get('page', 'N/A')
+             if 'results' in page_data and 'main' in page_data['results']:
+                 for news in page_data['results']['main']:
+                     # Extract relative date from description
+                     description = news.get('description', '')
+                     date_match = re.search(r"(\d+\s+(hour|day|week|month|year)s?\s+ago)", description, re.IGNORECASE)
+                     relative_date = date_match.group(1) if date_match else 'N/A'
+ 
+                     news_item = {
+                         'title': news.get('title', 'N/A'),
+                         'url': news.get('url', 'N/A'),
+                         'snippet': description,  # Use the full description
+                         'Tanggal': relative_date,  # Store the extracted relative date
+                         'Media': extract_domain_from_url(news.get('url', 'N/A')),
+                         'page': page_num
+                     }
+                     all_news.append(news_item)
+ 
+         news_results_df = pd.DataFrame(all_news)
+ 
+         # Join with media database
+         news_results_df['Media'] = news_results_df['url'].apply(extract_domain_from_url)
+         news_results_df = news_results_df.merge(media_db, on='Media', how='left')
+ 
+         return news_results_df
+ 
+     except (KeyError, TypeError) as e:
+         st.error(f"Error parsing Oxylabs API response: {e}")
+         return None
+ 
+ except requests.exceptions.RequestException as e:
+     st.error(f"Error making Oxylabs API request: {e}")
+     return None
+ except Exception as e:
+     st.error(f"Unexpected error: {e}")
+     return None
 
 # Ubah get_news_data untuk menghapus max_pages
 def get_news_data(method, start_date, end_date, keyword_query):
