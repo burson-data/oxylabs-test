@@ -304,12 +304,12 @@ def get_news_data(method, start_date, end_date, keyword_query):
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
     }
 
-    keyword_query = format_boolean_query(keyword_query)
+    boolean_keyword_query = format_boolean_query(keyword_query)
     if isinstance(end_date, datetime):
         end_date = end_date.date()
 
     end_date_plus_one = end_date + timedelta(days=1)
-    full_query = f"{keyword_query} after:{start_date} before:{end_date_plus_one}"
+    full_query = f"{boolean_keyword_query} after:{start_date} before:{end_date_plus_one}"
     encoded_query = urllib.parse.quote(full_query)
 
     base_url = f"https://www.google.com/search?q={encoded_query}&gl=id&hl=id&lr=lang_id&tbm=nws&num=10"
