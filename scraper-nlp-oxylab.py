@@ -341,13 +341,11 @@ def get_news_data(method, start_date, end_date, keyword_query):
  base_url = f"https://www.google.com/search?q={encoded_query}&gl=id&hl=id&lr=lang_id&tbm=nws&num=10"
  
  
- duck_url= f"https://duckduckgo.com/?q={keyword_query}&t=h_&df={start_date}...{end_date_plus_one}&iar=news&kl=id-id"
- 
  # 🚀 First scrape:
  if method == "BeautifulSoup":
      news_df = scrape_with_bs4(base_url, headers)
  if method == "Oxylabs":
-     news_df = scrape_google_with_oxylabs(keyword_query, "Indonesia")  # Use encoded_query
+     news_df = scrape_google_with_oxylabs(full_query, "Indonesia")  # Use encoded_query
  else:
      raise ValueError("Invalid method")
  return news_df
