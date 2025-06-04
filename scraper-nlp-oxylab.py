@@ -325,32 +325,32 @@ def scrape_google_with_oxylabs(query, geo_location, pages=1):
 
 # Ubah get_news_data untuk menghapus max_pages
 def get_news_data(method, start_date, end_date, keyword_query):
-    headers = {
-        "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
-    }
-
-    boolean_keyword_query = format_boolean_query(keyword_query)
-    if isinstance(end_date, datetime):
-        end_date = end_date.date()
-
-    end_date_plus_one = end_date + timedelta(days=1)
-    full_query = f"{boolean_keyword_query} after:{start_date} before:{end_date_plus_one}"
-    encoded_query = urllib.parse.quote(full_query)
-
-    base_url = f"https://www.google.com/search?q={encoded_query}&gl=id&hl=id&lr=lang_id&tbm=nws&num=10"
-    
-    
-    duck_url= f"https://duckduckgo.com/?q={keyword_query}&t=h_&df={start_date}...{end_date_plus_one}&iar=news&kl=id-id"
-
-    # 🚀 First scrape:
-    if method == "BeautifulSoup":
-        news_df = scrape_with_bs4(base_url, headers)
-    if method == "Oxylabs":
-        news_df = scrape_google_with_oxylabs(keyword_query, "Indonesia") 
-    else:
-        raise ValueError("Invalid method")
-    return news_df
+ headers = {
+     "User-Agent":
+     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
+ }
+ 
+ boolean_keyword_query = format_boolean_query(keyword_query)
+ if isinstance(end_date, datetime):
+     end_date = end_date.date()
+ 
+ end_date_plus_one = end_date + timedelta(days=1)
+ full_query = f"{boolean_keyword_query} after:{start_date} before:{end_date_plus_one}"
+ encoded_query = urllib.parse.quote(full_query)
+ 
+ base_url = f"https://www.google.com/search?q={encoded_query}&gl=id&hl=id&lr=lang_id&tbm=nws&num=10"
+ 
+ 
+ duck_url= f"https://duckduckgo.com/?q={keyword_query}&t=h_&df={start_date}...{end_date_plus_one}&iar=news&kl=id-id"
+ 
+ # 🚀 First scrape:
+ if method == "BeautifulSoup":
+     news_df = scrape_with_bs4(base_url, headers)
+ if method == "Oxylabs":
+     news_df = scrape_google_with_oxylabs(encoded_query, "Indonesia")  # Use encoded_query
+ else:
+     raise ValueError("Invalid method")
+ return news_df
 
 # Download article & analyze sentiment
 def enrich_with_nlp(df, selected_nlp=[]):
