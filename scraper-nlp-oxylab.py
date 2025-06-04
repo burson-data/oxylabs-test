@@ -321,7 +321,7 @@ def get_news_data(method, start_date, end_date, keyword_query):
     if method == "BeautifulSoup":
         news_df = scrape_with_bs4(base_url, headers)
     if method == "Oxylabs":
-        news_df = scrape_google_with_oxylabs(encoded_query, "Indonesia") 
+        news_df = scrape_google_with_oxylabs(keyword_query, "Indonesia") 
     else:
         raise ValueError("Invalid method")
     return news_df
