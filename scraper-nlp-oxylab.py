@@ -221,7 +221,7 @@ def scrape_with_bs4(base_url, headers=None):
 def scrape_google_with_oxylabs(query, geo_location, pages=1):
  """
  Scrapes Google News results using the Oxylabs Real-Time Web Scraper API,
- capturing all available data fields without renaming.
+ capturing all available data fields, renaming columns, and converting dates.
  
  Args:
      query: The search query.
@@ -273,12 +273,41 @@ def scrape_google_with_oxylabs(query, geo_location, pages=1):
                      # Capture all available data fields
                      news['page'] = page_num  # Add page number to the news item
                      all_news.append(news)
-
-      
+ 
          news_results_df = pd.DataFrame(all_news)
  
+         # Print the DataFrame columns (for debugging)
+         print(news_results_df.columns)
+ 
+         # Rename the columns
+         news_results_df = news_results_df.rename(columns={
+             'title': 'Judul',
+             'url': 'Link',
+             'desc': 'Snippet',
+             'source': 'Source',
+             'pos_overall': 'Pos_Overall',
+             'relative_publish_date': 'Tanggal',  # Corrected column name
+             'page': 'Halaman',
+             'Media': 'Media',
+             'Media Type': 'Media Type',
+             'Media Tier': 'Media Tier',
+             'Ad Value': 'Ad Value',
+             'Estimated Reach/Readership': 'Estimated Reach/Readership',
+             'Estimated Impressions': 'Estimated Impressions'
+             # Add more renamings as needed
+         })
+ 
+         # Apply convert_relative_date to the 'Tanggal' column
+         if 'Tanggal' in news_results_df.columns:
+             news_results_df['Tanggal'] = news_results_df['Tanggal'].apply(convert_relative_date)
+ 
          # Join with media database
-         news_results_df['Media'] = news_results_df['url'].apply(extract_domain_from_url)
+         if 'Link' in news_results_df.columns:
+             news_results_df['Media'] = news_results_df['Link'].apply(extract_domain_from_url)
+         else:
+             st.warning("Column 'Link' not found. Cannot extract Media.")
+             news_results_df['Media'] = 'N/A'
+ 
          news_results_df = news_results_df.merge(media_db, on='Media', how='left')
  
          return news_results_df
