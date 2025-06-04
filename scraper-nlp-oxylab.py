@@ -320,10 +320,11 @@ def get_news_data(method, start_date, end_date, keyword_query):
     # 🚀 First scrape:
     if method == "BeautifulSoup":
         news_df = scrape_with_bs4(base_url, headers)
-    elif method == "Oxylabs":
-        news_df = scrape_google_with_oxylabs(base_url)
+    if method == "Oxylabs":
+        news_df = scrape_google_with_oxylabs(encoded_query, "Indonesia") 
     else:
         raise ValueError("Invalid method")
+    return news_df
 
 # Download article & analyze sentiment
 def enrich_with_nlp(df, selected_nlp=[]):
