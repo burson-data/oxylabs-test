@@ -273,8 +273,19 @@ def scrape_google_with_oxylabs(query, geo_location, pages=1):
                      # Capture all available data fields
                      news['page'] = page_num  # Add page number to the news item
                      all_news.append(news)
- 
+
+      
          news_results_df = pd.DataFrame(all_news)
+
+         # Rename the columns
+         news_results_df = news_results_df.rename(columns={
+             'title': 'Judul',
+             'url': 'Link',
+             'desc': 'Snippet',
+             'relative_publish_date': 'Tanggal',  # Assuming 'published' contains the date
+             'page': 'Halaman'
+             # Add more renamings as needed
+         })
  
          # Join with media database
          news_results_df['Media'] = news_results_df['url'].apply(extract_domain_from_url)
