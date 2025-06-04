@@ -272,7 +272,7 @@ def scrape_google_with_oxylabs(query, geo_location, pages=1):
                  for news in page_data['results']['main']:
                      # Extract relative date from description
                      description = news.get('description', '')
-                     date_match = re.search(r"(\d+\s+(hour|day|week|month|year)s?\s+ago)", description, re.IGNORECASE)
+                     date_match = re.search(r"(\d+\s+(hari|jam|menit|minggu|bulan|tahun)\s+lalu|kemarin)", description, re.IGNORECASE)
                      relative_date = date_match.group(1) if date_match else 'N/A'
  
                      news_item = {
