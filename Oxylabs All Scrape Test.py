@@ -39,13 +39,8 @@ import torch
 
 # Prevent Streamlit from scanning torch.classes
 if isinstance(torch.classes, types.ModuleType):
-torch.classes.__path__ = []
-## ONLINE STREAMLIT DEPENDENCIES ###
-
-# Optional: Selenium only if selected
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
+    torch.classes.__path__ = []
+    ## ONLINE STREAMLIT DEPENDENCIES ###
 
 # Read media database
 URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQwxy1jmenWfyv49wzEwrp3gYE__u5JdhvVjn1c0zMUxDL6DTaU_t4Yo03qRlS4JaJWE3nK9_dIQMYZ/pub?output=csv'.format()
