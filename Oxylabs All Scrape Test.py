@@ -21,9 +21,6 @@ from transformers import BertTokenizer, EncoderDecoderModel
 from transformers import pipeline
 from tqdm import tqdm
 
-from selenium.webdriver.support.ui import WebDriverWait  # Import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC  # Import expected_conditions
-
 import yake
 import re
 
