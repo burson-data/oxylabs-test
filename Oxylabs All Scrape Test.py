@@ -163,50 +163,50 @@ def extract_domain_from_url(url):
     
     # Fungsi untuk menyimpan dan memuat jadwal
     def load_schedules():
-    if os.path.exists("schedules.pkl"):
-        with open("schedules.pkl", "rb") as f:
-            return pickle.load(f)
-    return []
+        if os.path.exists("schedules.pkl"):
+            with open("schedules.pkl", "rb") as f:
+                return pickle.load(f)
+        return []
     
     def save_schedules(schedules):
-    with open("schedules.pkl", "wb") as f:
-        pickle.dump(schedules, f)
-    
+        with open("schedules.pkl", "wb") as f:
+            pickle.dump(schedules, f)
+        
     # Ubah fungsi scrape_with_bs4
     def scrape_with_bs4(base_url, headers=None):
-    news_results = []
-    page = 0
-    
-    while True:
-        start = page * 10
-        url = f"{base_url}&start={start}"
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.content, "html.parser")
-        results_on_page = 0
-    
-        for el in soup.select("div.SoaBEf"):
-            try:
-                news_results.append({
-                    "Link": el.find("a")["href"],
-                    "Judul": el.select_one("div.MBeuO").get_text(),
-                    "Snippet": el.select_one(".GI74Re").get_text(),
-                    "Tanggal": convert_relative_date(el.select_one(".LfVVr").get_text()),
-                    "Media": extract_domain_from_url(el.find("a")["href"])
-    
-                })
-                results_on_page += 1
-            except:
-                continue
-    
-        if results_on_page == 0:
-            break
-    
-        page += 1
-        time.sleep(random.uniform(1.5, 25.0))  # Waktu tunggu lebih pendek, bisa disesuaikan
-    # NEW: Convert to dataframe & join with database
-    news_results = pd.DataFrame(news_results, columns=['Link', 'Judul', 'Snippet', 'Tanggal', 'Media'])
-    news_results = news_results.merge(media_db, on='Media', how='left')
-    return news_results
+        news_results = []
+        page = 0
+        
+        while True:
+            start = page * 10
+            url = f"{base_url}&start={start}"
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, "html.parser")
+            results_on_page = 0
+        
+            for el in soup.select("div.SoaBEf"):
+                try:
+                    news_results.append({
+                        "Link": el.find("a")["href"],
+                        "Judul": el.select_one("div.MBeuO").get_text(),
+                        "Snippet": el.select_one(".GI74Re").get_text(),
+                        "Tanggal": convert_relative_date(el.select_one(".LfVVr").get_text()),
+                        "Media": extract_domain_from_url(el.find("a")["href"])
+        
+                    })
+                    results_on_page += 1
+                except:
+                    continue
+        
+            if results_on_page == 0:
+                break
+        
+            page += 1
+            time.sleep(random.uniform(1.5, 25.0))  # Waktu tunggu lebih pendek, bisa disesuaikan
+        # NEW: Convert to dataframe & join with database
+        news_results = pd.DataFrame(news_results, columns=['Link', 'Judul', 'Snippet', 'Tanggal', 'Media'])
+        news_results = news_results.merge(media_db, on='Media', how='left')
+        return news_results
 
 def scrape_google_with_oxylabs(query, geo_location):
     """
