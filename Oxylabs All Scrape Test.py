@@ -100,9 +100,9 @@ def format_boolean_query(query):
     
     # Set locale (fallback ke C jika id_ID tidak tersedia)
     try:
-    locale.setlocale(locale.LC_TIME, "id_ID.utf8")
+        locale.setlocale(locale.LC_TIME, "id_ID.utf8")
     except:
-    locale.setlocale(locale.LC_TIME, "C")
+        locale.setlocale(locale.LC_TIME, "C")
 
 def convert_relative_date(text):
     text = text.lower().strip()
